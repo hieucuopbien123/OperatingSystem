@@ -239,10 +239,12 @@ Bẫy SJF bình thường là nonpreemptive nên task nào đang làm sẽ làm 
 
 
 
-# Virtual memory: 
+## Nửa kỳ sau
+
+# Main memory: 
 Process là 1 file và file thì luôn chiếm memory, size của file là lượng byte nó chiếm. Lượng byte này được ánh xạ vào address. Vì mỗi byte trong main mem có 1 address. Computer dựa vào address của file để lấy được content file trong bộ nhớ(sau khi file được load vào mainmem) là 1 lượng byte nhất định có size bằng với size của file.
 Address space của 1 process nói chung cũng chỉ là set of address be used by a file process.
-VD: máy tính mainmem có 32GB tức 2^32 bytes. 
+VD: máy tính mainmem có 32GB tức 2^32 bytes -> sai
 Main mem là 1 chuỗi byte bắt đầu từ address 0, giả sử nó có 64B lần lượt các address liên tiếp và có 1 chương trình kích thước 4B. Thì ta load file đó vào mainmem và lượng byte mà file sử dụng cũng là 4 bytes khác nhau trên mainmem. Address space của nó là các dịa chỉ xác định nó được lưu trên bộ nhớ VD {0, 2, 5, 9}. Giả sử nó lưu 4 byte rời rạc như v. Có 2 loại address space là virtual và physical address space.
 Virtual address space luôn bắt đầu bằng address 0 và address mà 1 process used trong virtual address space luôn là consecutive. Kích thước bằng kích thước file:
 VD: Virtual address space: 0  1  2  3  4  ...  2^m-1 với 2^m-1 là size of file - 1 và 2^m-1 chính là address cuối cùng của virtual address space của process file đó. (Từng block)
@@ -251,12 +253,12 @@ Physical address space là địa chỉ trên bộ nhớ vật lý thật lưu d
 Trước khi store trên physical mem thì virtual mem phải decompose thành các brick. Nó tính toán VD virtual space rộng 2^4 size được tách thành các page same size, nó định nghĩa page là 2^2 = 4 bytes thì VAS phải có 4 pages. Điều này tùy thuộc vào physical mem phải có có size frame cũng là 4 bytes mới lưu được. 
 VD logical mem: page0, page1, page2, page3
 Page table: 0->1, 1->4, 2->3, 3->7 có 4 entry này. Size of page table phụ thuộc vào số lượng page. page0 của VAS map vào entry 0 của Page table,...
-Physical mem có các frame number: 0 1 2 3 4 5 6 7 trong đó 1, 3, 4, 7 là thứ tự các bytes lưu content của process file trong bộ nhớ tương ứng với các page.
+Physical mem có các frame number: 0 1 2 3 4 5 6 7 trong đó 1, 3, 4, 7 là thứ tự các bytes lưu content của process file trong bộ nhớ tương ứng với các page. Process file load vào main mem chia thành từng cục frame 1 đó
 => Tức Page table có 4 entry để map 4 page vào frame
 
 1 page có thể có nhiều address. VD: page0 có 16 bytes là page đầu tiên nên trên VAS lưu từ address 0-15 và từ address 16 trở đi là page tiếp theo. Trên page table ánh xạ 0->1 tức ánh xạ tới frame1 trên bộ nhớ vật lý mà frame có kích thước bằng với page tức là địa chỉ từ 16-31 sẽ lưu frame1 và lưu content của page0 của VAS
 
-Cần bao nhiêu bit để access 8 bytes trong process file, tức VAS của process là 8 bytes. Dùng 3 bit. VD cần access byte 0 thì truyền vào 000, byte 1 thì truyền vào 001. Do đó size of file thường biểu diễn dạng 2^n để ta biết cần n bit để address mọi byte trong file đó.
+Cần bao nhiêu bit để access 8 bytes trong process file, tức VAS của process là 8 bytes. Dùng 3 bit. VD cần access byte 0 thì truyền vào 000, byte 1 thì truyền vào 001. Do đó size of file thường biểu diễn dạng 2^n để ta biết cần n bit để address mọi byte trong file đó. k nói về vc chia page thì k cần chia page
 
 Sau khi tìm ra được address frame rồi, bh ta cần tìm address của từng instruction inside frame. Có VD trong slide nói rất rõ. 
 Nó tách logical address thành 2 phần. Giả sử VAS có 2^m bytes mà 1 page có 2^n bytes. Cần m byte để biểu diễn address của từng block nhưng nó chia thành 2^m/2^n page tức 2^(m-n) page nên chỉ cần m-n bit để biểu diễn index of page còn n bit cuối trong m bit sẽ biểu diễn offset trong trong 1 page kích thước 2^n. Nó lấy m-n bit đầu để xác định entry page table nào. Sau khi xác định address của frame rồi sẽ kết hợp với n bit cuối để xác định offset trong chính frame đó, vị trí nào là đến block cần tìm hay instruction cần tìm. Page table có 2^(m-n) entry và cần dùng m-n bit kích thước. 
@@ -277,7 +279,7 @@ Khi 1 process được tạo ra thì address đầu tiên của process k tồn 
 Vấn đề là Page Table lớn tốn nhiều bộ nhớ và thời gian. Khi đó người ta dùng Hierarchical Page Tables hay Two-Level Paging để chia page thành nhiều page nhỏ hơn và cũng chia địa chỉ logical address thành 3 mức: p1 offset của outer page table, p2 offset tới page of page table, d offset của memory frame cuối cùng, như v thì page table được chia ra chứ kp 1 page table to đùng chứ mọi thứ nữa. VD 1 logical address 32 bit được chia thành 10 10 12 thì 10 bit đầu của address dùng làm offset trong outerpage tức index outerpage có đến 2^10 entries, mỗi entries dùng 4 bytes cả cái page table dùng 2^10*4 = 2^12 = 4096B.
 Cứ tưởng tượng kiểu chia cái process file làm 2^10 phần bằng nhau, mỗi lần lại có 2^10 phần nhỏ bên trong, mỗi phần nhỏ đó trỏ tới 1 frame
 
-Cách 2 để reduced size of page table là dùng hash page table. VD process file có 8 VAS. Nếu dùng Page Table bình thường ta cần 3 bit. Ta muốn giảm size of page table xuống còn chỉ cần 2 bit tức 4 address bằng hashing thì ta mode cái address của VAS với 2^2. Khi đó Vd 2 address 0 và 4 của VAS cùng đi vào same entry của page table là 0, khi đó ta phải dùng linked list cho mỗi entry of page table kiểu: 0 []->[0->23]->[4->30] r cho nó duyệt
+Cách 2 để reduced size of page table là dùng hash page table. VD process file có 8 VAS. Nếu dùng Page Table bình thường ta cần 3 bit. Ta muốn giảm size of page table xuống còn chỉ cần 2 bit tức 4 address bằng hashing thì ta mode cái address của VAS với 2^2. Khi đó Vd 2 address 0 và 4 của VAS cùng đi vào same entry của page table là 0, khi đó ta phải dùng linked list cho mỗi entry of page table kiểu: 0 []->[0->23]->[4->30] r cho nó duyệt. K nói gì về page thì đang coi 1 addres 1 page
 
 Inverted Page Table thì chỉ dùng 1 page table và số lượng entry của page table bằng số lượng frame trong physical memory. Cái page table nào thì tương đương index thứ tự vị trí đó trong page table. First entry for frame 0. Với cách này ta hiểu là chỉ có 1 page table duy nhất cho tất cả mọi process, do đó trong hình ta thấy page table lưu thêm pid của process hiện tại đang trỏ tới. Tức là page table lưu liên tiếp các entry cùng pid, dựa vào pid tìm entry cho page 0 của pid đó và từ đó tìm index của page cần tìm, cái index đó là frame number của mem luôn. Cách này cũng làm giảm size của page table về tổng thể nhưng phải tìm thêm mỗi khi cần tìm instruction
 
@@ -286,7 +288,10 @@ Bỏ segmentation -> k thi
 Swapping là quá trình lưu toàn bộ process từ main mem vào hash disk, bao gồm cả stack và mọi thông tin trên mainmem tạo ra trong quá trình chạy và load 1 process khác từ hard disk vào main mem. Nhiều process quá lớn so với phần trống còn lại của RAM thì vc swapping là bắt buộc khi nó lưu process có low priority vào hard disk để load process to vào. Linux và Window k rõ bh nó còn dùng swapping nữa k.
 Swapping có thể dùng với Paging system.
 
-Virtual Memory là cho người dùng cảm tưởng mình có nhiều memory hơn RAM dù thực tế RAM là tất cả real memory mà ta có. VD RAM có 4GB or 8GB nhưng Virtual Mem làm người dùng cảm thấy mình có tới 100GB bộ nhớ. Process của ta có thể dùng nhiều hơn 4GB RAM đang có thì system sẽ cung thêm RAM cho ta dùng, gọi là virtual ram hay virtual mem. 
+
+
+# Virtual mem
+Virtual Memory là cho người dùng cảm tưởng mình có nhiều memory hơn trong RAM dù thực tế RAM là tất cả real memory mà ta có. VD RAM có 4GB or 8GB nhưng Virtual Mem làm người dùng cảm thấy mình có tới 100GB bộ nhớ. Process của ta có thể dùng nhiều hơn 4GB RAM đang có thì system sẽ cung thêm RAM cho ta dùng, gọi là virtual ram hay virtual mem. 
 Cơ chế rất đơn giản là OS k store toàn bộ page trong main mem mà chỉ store subset của nó. VD logical mem của process có 8 pages nhưng chỉ có 3 pages là store trong RAM, còn lại lưu trong hard disk. Store trong RAM có giá trị valid-invalid bit là valid, store trong harddisk thì giá trị bit đó sẽ là invalid. Khi cần đến phần memory đó thì system thực hiện paging tìm frame cần lấy trong harddisk và lưu vào main mem RAM, lưu frame number vào page table. Cần phân biệt hành động này là Paging khác với Swapping là cơ chế load whole process bên trên. 
 Cơ chế: lấy logical address tìm entry đó trong page table -> thấy invalid bit -> create 1 interrupt -> trap -> OS solve problem và xử lý lỗi nếu có lỗi -> k lỗi mà là thiếu frame thì send request tới harddisk -> bring in missing frame vào freeframe trong physical mem -> gửi address của free frame đó vào page table -> gửi lại data cần lấy
 
@@ -308,7 +313,7 @@ Page replacement thực hiện khi 1 frame cần được chạy nhưng k có tr
 K có thuật toán làm page fault optimal vì phải nhìn trước tương lai reference string. 
 
 Mỗi process được allocate 1 lượng frame nhất định. 
-Fixed allocation là mỗi process được allocated 1 lượng frame như nhau, chia đều total frame cho từng process. priority allocation thì mỗi process được allocated lượng frame phụ thuộc vào priority càng cao thì càng nhiều frame. Càng nhiều frame tổng thể thì càng ít page fault vì lúc nào cũng tìm được frame có sẵn. Mỗi page càng ít frame thì càng ít page fault.
+Fixed allocation là mỗi process được allocated 1 lượng frame như nhau, chia đều total frame cho từng process. priority allocation thì mỗi process được allocated lượng frame phụ thuộc vào priority càng cao thì càng nhiều frame, phụ thuộc vào kích thước nx chứ. Càng nhiều frame tổng thể thì càng ít page fault vì lúc nào cũng tìm được frame có sẵn
 
 Thrashing thì có quá nhiều process làm nó page fault liên tục, thời gian page fault solve lớn hơn thời gian execute. CPU do nothing for task vì bận solve page fault.
 
@@ -349,22 +354,33 @@ VD: thao tác với database thì có 2 loại process là reader process và wr
 
 Slide trang 55 phân tích Readers-Writers Problem:
 Trước khi write phải check rw_writer ok. Còn read có 2 critical section
-Trước khi read phải check vẫn read được với wait(mutex), read_count++ => tức là read_count++ k được phép có 1 reader khác cũng sửa đổi biến read_count sẽ thành sai nên cái wait(mutex) là để xử lý modify biến read_count, nếu đây là reader đầu tiên thì có thể đang có writer vào database và ta phải chờ nó xong(vì k cho phép vừa read, vừa write cùng lúc => quy tắc qtr), viết xong thì signal mutex để cho reader khác có thể sửa read_count
+Trước khi read phải check vẫn read được với wait(mutex), read_count++ => tức là read_count++ k được phép có 1 reader khác cũng sửa đổi biến read_count sẽ thành sai nên cái wait(mutex) là để xử lý modify biến read_count, nếu đây là reader đầu tiên thì có thể đang có writer vào database và ta phải chờ nó xong(vì k cho phép vừa read, vừa write cùng lúc => quy tắc qtr), ngược lại k có write thì nó đi tiếp, viết xong thì signal mutex để cho reader khác có thể sửa read_count
 perform reading
 read xong thì làm tương tự để giảm read_count nhưng vừa nãy nếu là reader đầu tiên thì ta dừng cái writer process lại, bh nếu như k còn reader nào nx thì ta trả lại writer quyền modify. Ta làm như v sẽ bao quát được kiểu đang có reader này thì reader khác vào thì ta k thể cứ mỗi lần 1 reader mới thì phải chỉnh sửa mutex cho writer nx mà chỉ cần biết cứ có reader là k được write, hết reader thì write
+Ý là với cách dùng rw_mutex như thế thì write trước sẽ k thể read, read trước sẽ k thể write, cái nào vào trước thì làm trước. VD read trước mà có 100 reader ở hàng đợi vào từ từ thì éo write được luôn vì nó chỉ signal hết khi read_count về 0
 
+
+
+# File system: 
 Nói tới file là ta lưu trong secondary storage gồm hard-disk driver và nonvolatile mem.
 1) HHD: platter có thể xoay để read/write head trỏ tới đúng section. Các sector là đơn vị nhỏ nhất trên đĩa và k thể chia nhỏ hơn nên read/write head phải read one or more of whole sector.
 Latency là độ trễ là 1/(RPM/60) với RPM là rotation per minute tức số giây cần cho 1 rotation. 
 Seek time là thời gian tìm kiếm hay thời gian để cái read/write head move tới đúng cylinder. 
-2) NVM: Vc format trên disk như thế nào, số lượng sector hay bố cục là thuộc về phần cứng khi mua, lập trình viên k đổi được nó. Partition là chia đĩa ra 1 nhóm các cylinder hay hiểu là sequence of track như trong hình. Tức là file thực tế là lưu trên từng partition của hard disk. Harddisk có cấu trúc như hình trong slide và được chia ra thành các partition lấy sequence of track.
+2) NVM: Vc format trên disk như thế nào, số lượng sector hay bố cục là thuộc về phần cứng khi mua, lập trình viên k đổi được nó. Các bước format disk:
+-> disk là blank slate và chia thành từng sector với low-level format, mỗi sector có header, data, ECC cho read/write head trỏ tới
+-> disk is partitioned thành 1 nhóm các cylinder hay hiểu là sequence of track như trong hình. Tức là file thực tế là lưu trên từng partition của hard disk. 
+-> logical formatting hay tạo hệ thống file cụ thể. Trên mỗi partition có thông tin về: superblock, bootblock, free space, inode, root dir
+
 Boot block: record on sector. Trên mỗi partition của đĩa đều có 1 boot block nhưng chỉ có 1 cái có thông tin về OS, thông tin này dùng để boot(start) OS khi khởi động máy tính. Các partition nào khác cũng đều có bootblock nhưng vô dụng.
-Super block chứa các thông tin như size của partition, type of file system, number of block in a file system,..
+Super block chứa các thông tin như size của partition, type of file system, number of block in a file system. Nó được load vào mem khi computer is booted or file system được tác động vào lần đầu tiên để OS lấy thông tin file
 Free space mgmt chứa thông tin sector nào free hay không.
 I-node chứa thông tin về structure của Unix OS. Mỗi file có 1 I-nodes, trong đó lưu map address of all block lưu file này
 
 File naming giới hạn kích thước là 255 ký tự trên window vì bản thân là 1 phần của thông tin file chiếm bộ nhớ nên phải bị giới hạn
 OS biết cách tìm ấy file trên hard disk. Khi ta chạy 1 file, thực chất OS mở 1 software khác để hỗ trợ mở cái file đó show cho người dùng. Loại software được xác định qua extension trong tên file.
+
+1 partition = set các blocks(sectors) trên ổ drive = có a file system trong nó
+
 Partition table chứa thông tin partition nào nằm vị trí nào. 
 
 window use \ and UNIX use / in path name
@@ -373,8 +389,8 @@ block trong file system là unit of transfer
 
 LBA nó như index hay ID of block, xác định vụ trí của block of data trên HHD
 
-OS see physical mem như 1 sequence of block như 1 array [0,1,2,3,4,5,6] và nó có hàm để ánh xạ từ sector trên harddisk vào cái array này => OS chỉ thấy cái array này chứ k cần biết physical mem làm cái gì. Khi OS muốn store cái gì thì nó sẽ store trong array này dựa vào index. 
-Mỗi sector được đánh index từ 0 -> number of sector on harddisk
+OS see physical mem như 1 sequence of block như 1 array [0,1,2,3,4,5,6] và nó có hàm để ánh xạ từ sector trên harddisk vào cái array này => OS chỉ thấy cái array này chứ k cần biết physical mem làm cái gì. Khi OS muốn store cái gì thì nó sẽ store trong array này dựa vào index => bản chất của block
+Mỗi sector được đánh index từ 0 -> number of sector on harddisk. Block chứa nhiều sectors
 Có hàm convert từ index number -> cylinder number -> head number -> sector number. 1 sector cũng store trong 1 track -> đều convert được từ index on the table. 
 => Thông tin về block nào free, block nào k free cũng được store trên hard disk.
 1 block được lưu trong 1 partition trên hard disk, thông tin về block free như ID block free cũng được lưu ở 1 phần của partition, nằm trong blocks khác
@@ -383,19 +399,22 @@ VD trên hình slide 31 là sequence block trên partition mà mỗi block conta
 ID của block lưu kích thước tốn phụ thuộc vào số lượng block ta dùng hay phụ thuộc vào physical device. VD nó tốn 4 bytes để lưu ID của block thì tức cần 4 byte để xác định 1 block có free hay k
 Giả sử 1 sector là 1KB = 1024 bytes mà 1 block ID tốn 4 bytes thì có đến 1024/4=256 free block inside 1 block of sector on the disk -> có thể refer tới 256 free block trong 1 block
 => Nếu harddisk là 1TB thì cần 4 triệu block như v để store các block free trong whole disk. 
-Lấy kích thước harddisk chia size each block để ra số lượng block
+số lượng block = size of harddisk / size each block
+số lượng free block trong 1 sector = size of 1 sector / size of block ID
 
 Để detect block nào free, người ta dùng bitmap. 1 chuỗi 101010 thì thứ tự lần lượt là block 1,2,3 thì 1 là free, 0 là k free => Cách bitmap này tốn ít bộ nhớ hơn cách dùng diskblock linkedlist trước
 
 VD: sector of block la 1KB. Ta dùng block để tạo bitmap tìm block data free trên harddisk thì trên 1 block ta có thể reference tới bao nhiêu freeblock in bitmap => 1024*8 block 
 => vì block có kích thước 1KB để tạo 1 cái bitmap thì 1KB = 1000bytes(decimal) = 1024bytes(binary) tạo bitmap từng bit với 1 bit là 1 block thì refer max được 1024*8 block là đúng r. Nhưng thực tế các block nối chỉ định free block này sẽ nối với block tiếp theo vì dùng linkedlist như hình nên mất 4 bytes để refer tới block tiếp theo nên trừ đi 32 nx. 
 
-First bit of bitmap refer to first block of partition nào đó. The first block trong partition đó là offset from zero on disk.
+First bit of bitmap refer to first block of partition nào đó. The first block trong partition đó là offset from zero on disk => có nhiều partition chứa nh block mà
 
 HardDisk: Parittion1[0,1,2], P2[3,4,5,6,7], P3[...] và bitmap cho P2 là 01011 => tức 3 và 5, 6 đang free => số bit bằng số lượng block trong partition. Cách 1 thì số block bằng số free block. Cách 2 thì số bitmap bằng tổng số lượng block.
 
 Consecutive allocation:
 Khi cần store 1 file, block là consecutive block. Nếu allocate được sector to file, ta có thể thực hiện bằng cách tìm 4 consecute block. Khi delete file, nó sẽ clear the whole in the partition. Gặp vấn đề về fragmentation. Do từng cục liền nhau rời rạc, nếu các phần kẽ hở k lấp đầy sẽ bị lãng phí
+Cả block free cũng chỉ store block đầu tiên trong free list
+
 Linked list allocation:
 Lưu k consecutive nhưng phải thêm 1 trường refer tới block tiếp theo của file nên tốn nhưng lại k gặp vấn đề về fragmentation và dùng đủ bộ nhớ. 
 Điểm bất tiện khác là đọc 1 block để lấy link đến block tiếp theo -> fetch block tiếp và đọc tiếp và cứ thế phải fetch từ hard disk và mainmem liên tục. Cách trước thì nó liền nhau nên fetch cả đống được luôn. 
@@ -403,8 +422,6 @@ Lưu k consecutive nhưng phải thêm 1 trường refer tới block tiếp theo
 FAT là table stored in hard disk và khi làm vc với partition thì nó sẽ được store vào main mem, giúp search address của file nhanh hơn. Lấy address cũng như first block từ FAT. VD file A bắt đầu từ index 4 of FAT trỏ đến 7 -> ... => kiểu cho biết block tiếp theo là gì
 Điểm lợi là FAT is loaded trong main mem nên nhanh hơn
 
-
-Bài cuối:
 FAT = File Allocation Table
 File name tốn 8 bytes trong directory entry tức tên file k được dài quá 8 bytes. Extension 3 bytes tức có 3 ký tự thôi(đang VD chứ kp là Window như v nhé). First block là vị trí block đầu tiên lưu file đó trong bộ nhớ. 
 Trong OS khi ta mở file trong thư mục thì ta dùng hash table để lấy nội dung file.
@@ -417,8 +434,10 @@ Hệ thống file có thể bd dạng cây và root của cây chính là root d
 Datablock để allocate block to file or directory.
 
 FAT12 tức cần 12 bit để index mọi block trong FAT table.
+FAT 12 dùng trong floppy disk, FAT 16 32 dùng trong larger hard disk
+VD: block size là 4KB mà FAT 12 dùng đánh max được 2*12 block thì 1 partition có 1 block size thì có 4*2^12 KB = 16MB. Mỗi partition lưu được 16MB data. Đương nhiên là để dùng FAT 12 với larger disk thì cần tăng kích thước block size là lượng data block có thể lưu r. Nhưng FAT12 max là 16MB, FAT16 max 2GB, FAT32 là 2TB 1 partition
 
-Càng phát triển, capacity của harddisk càng tăng nhưng file system thì vẫn thế nên để dùng FAT12 cho các drive lớn, họ tăng size của mỗi block, mỗi sector lên thành 1kB, 2KB, 4KB. Ta có thể index max 2^12=2096 sector or block nên tăng kích thước của block là 1 cách để dùng FAT12 cho các drive kích thước lớn. Cách khác là dùng all possible entries mà ta có với 12 bit tức 4096 sector or block. 
+Càng phát triển, capacity của harddisk càng tăng nhưng file system thì vẫn thế nên để dùng FAT12 cho các drive lớn, họ tăng size của mỗi block, mỗi sector lên thành 1kB, 2KB, 4KB. Ta có thể index max 2^12=2096 sector or block nên tăng kích thước của block là 1 cách để dùng FAT12 cho các drive kích thước lớn. Cách khác là dùng all possible entries mà ta có với 12 bit tức 4096 sector or block là max mà 1 FAT12 có thể refer tới
 Trên window chỉ support 4 disk C D E F nên FAT12 có thể address disk max tới 64MB.
 Với FAT 12, có 2^12 = 4096 entries có thể có trong table. Mỗi entries của table point đến 1 block có 4KB. Nên amount of mem is addressed bởi FAT table là 4096 *4KB ~ 16MB
 VD: FAT table: [0-4,...,...,...,4-...,...,4095-...] có 4096 entries và mỗi entries có number trỏ đến next block store nd của file. File đó là F1 [Block1-Block4-...] mỗi block 4KB tức file có 12KB thì nd sẽ được lưu bởi 3 blocks. Ta xem được block nào store file này bằng cách nhìn vào entries of directory for file ở mục First Block Number bên cạnh các trường như Date, Time,... sau khi biết First Block thì nhìn vào FAT table sẽ ra các block tiếp theo
@@ -433,12 +452,66 @@ FAT32 thg dùng trong các thiết bị USB.
 
 Bản chất cũng chỉ là mapping từ entries của table sang block lưu file
 
+Inode là cơ chế nó khá giống FAT table, được dùng trong linux, window dùng cái tương tự inode nhưng gọi là NTFS
+
+
+##### breakmind #####
+
+FAT, block, sector, entry, directory, partition, file
+
+Disk là đĩa cứng là thứ chứa tất cả mọi thứ khác về mặt vật lý
+Ở phía người dùng thì ổ đĩa trên máy ta thấy là drive, nó rất lớn và gồm nhiều partition. Mỗi drive đó có 1 FAT (or NTFS nếu dùng NTFS). Đó là ở phía người dùng, thực tế mỗi directory có 1 FAT table nếu nó dùng method allocation là FAT table.
+Directory nằm trong ổ đĩa theo cấu trúc phân cấp cây thư mục, directory có file. Thực tế trong phần cứng k có file mà nó lưu dạng block, file là 1 set các blocks.
+Disk có nhiều partition, partition gồm nhiều block, block gồm nhiều sectors.
+Block này là data block là nơi từng đơn vị data lưu vào.
+Bản chất là ánh xạ từ phần cứng (sector) sang phần mềm (block) để các ứng dụng hay gì đều thao tác với phần mềm
+
+Về kích thước: 
+1) Xác định block free bằng trường free space management trong partition:
+-> Dùng pp linked list block lưu address(ID) của block free
+số lượng block = size of harddisk / size each block
+số lượng free block trong 1 sector = size of 1 sector / size of block IDs(làm tròn dạng byte là power of 2 dạng bit) - 1 vì 1 block dôi ra để pointer to next block
+-> Dùng bitmap tính theo số bit:
+VD: 1 sector of block là 1KB(đang xét 1 sector ~ 1 block) thì nó xđ được max 1024*8 - 32 cho block free vì nó cần 32 bits = 4 bytes để pointer vào next block
+=> 1 hàng là 1 sector
+
+2) Khi allocate consecutive physical block cho file
+VD: Block 1KB thì file 50KB được gán vào 50 block
+
+
+3) Khi dùng FAT để allocate block to file trong window:
+1 partition chứa 1 FAT table và nhiều block. Nó dùng FAT để đánh dấu đến block nào nó muốn sử dụng. Tức là có thể có vô số block với kích thước size mong muốn trên disk nhưng thực tế chỉ dùng được lượng mà FAT có thể trỏ tới:
+VD: FAT 12 dùng 12 bit để xác định block thì nó xác định được max 2^12 block. Nếu ta chia mỗi block 4KB thì parttion đó có size là 4*2^12=16MB. Giả sử hđh dùng 4 partition C D E F là max với FAT 12 thì hđh đó lưu max lượng data là 16*4=64MB
+
+Tương tự với các FAT khác: FAT12 max là 16MB, FAT16 max 2GB, FAT32 là 2TB 1 partition
+
+4) Dùng FAT để allocate, tính toán liên quan đến entry:
+VD FAT 12 dùng 12 bit để allocate max tới 4096 block, block chính là entries trong FAT table. Nó sẽ có dạng - FATTABLE: [block1, block2, block3,..] => block1 có pointer đến block2, block2 pointer đến block3. 
+Còn trong directory đó có bnh file thì mỗi file chiếm 1 lượng block. File cũng có dạng: [Block1-Block4-Block5] là TH file chiếm 3 block.
+
+
+Phân biệt 4 loại cấu trúc đã học:
+1) Cấu trúc partition: là cấu trúc cơ bản nhất có bootblock, superblock, free space management, inodes, root dir, other file and directory
+2) Cấu trúc của block: Có rất nhiều loại block nhưng hầu hết đều lưu cơ bản là content và pointer to next block
+3) Cấu trúc của FAT của 1 disk: Boot block, FATx1, FATx2, data block chứa data thực sự là cái table đó
+4) Cấu trúc của file/directory:
+Metadata như name, extension, attributes, time, date, size, reserved
+First block number là trường quan trọng chứa block đầu tiên chứa data -> muốn lấy data của file thì lấy từ first block number rồi nhìn vào FAT table ra vị trí block tiếp theo và cứ thế lấy từng block ra hết content của file
+
+##### breakmind #####
+
+
 Trong windows NTFS thì entries rất đơn giản là: [Filename][reference number to first block]. Block cũng chỉ là các sector trong hình. 
 Master File Table cũng giống FAT table, nó k được load vào mainmem vì kích thước lớn. Nó là array index từ 0, mỗi entries của array xđ 1 file, map file vào block. 1 entry là 1KB. Đầu master file sẽ lưu boot block, bootblock là address của block đầu tiên store trong MFT.
 Mỗi entries lưu các trường thông tin bao gồm cả thông tin phục vụ mapping. Window dùng consecutive block lưu file.
 
+Mỗi NTFS file chứa 1 tập hợp attribute từng entry và mỗi cái được lưu dạng stream of bytes. 1 file có thể có nhiều stream chứa thông tin như file name, stream name.
+
+
 Linux dùng i-nodes.
 Partition trong Linux khác window là nó chia thành các sub group. Trong 1 subgroup ta có data của 1 cylinder trên harddisk, tốc độ lấy nhanh hơn khi move head đến 1 cylinder. 
+
+inode lưu 12 address trên disk của 12 block lưu data của file đó. Nếu file data cần lớn hơn 12 block thì nó bắt đầu dùng indirect block để trỏ tiếp 
 
 block bitmap lưu thông tin xem block nào free(bằng cách đánh 1/0 đã biết)
 i-node bitmap chỉ định sequence of block storing info of file(k store file content). Khi file được tạo ra, nó take 1 i-node và phải nhìn vào i-node bitmap để tìm i-node free. 
@@ -448,9 +521,35 @@ Tương tự window, trong mỗi entries của linux chứa tên file và i-node
 Mỗi process có 1 table lưu file descriptor. Khi open file sẽ gọi system call trả ra 1 sô chỉ định file descriptor. Mỗi file descriptor trong file descriptor table trỏ đến 1 opened file trong opened file table. Khi 1 file được open cũng sẽ có 1 i-node cho file đó trong i-node table. Mỗi entry trong opened file table lại point đến 1 entry của i-node table, entry này point tới data block lưu content của file.
 file descriptor table này nằm ở main mem, kernel space.
 
+Process open file -> go to root directory -> tìm entry đúng -> lấy file descriptor trỏ -> [file descriptor table] trỏ -> [opened file table] trỏ -> [i node table] -> address on disk -> tìm block of lưu data đúng -> load to main mem -> trả lại file descriptor
+
 Mở file trong linux -> go to root directory -> tìm entry usr -> lấy i-node number -> fetch i-node từ hard disk lên main mem dựa vào i-node number -> tìm block of directory usr -> load directory usr lên main mem -> read usr và tìm entries me chẳng hạn -> i-node point to block thì ta lấy block tương ứng với me -> ... -> return file descriptor
 
 Khi kết nối các thiết bị mà có partition, OS phải mount into file system trên window or linux. 
 Window có thể có các file system rời nhau k trong single tree, linux chỉ có 1 tree và tất cả cùng mount vào 1 tree đó
 
 Có 1 small memory trên mainboard của máy tính gọi là BIOS, nó chứa code cho phép processor đọc phần boot sector là sector zero trên partition, nó xác định partition nào và chạy phần boot block.
+
+
+
+# Other
+- The most significant bit là tập bit phía bên trái
+- Given a constant address space on 32 bits, the size of the page table decreases with larger pages vì size of page table chỉ xét số lượng entry thôi
+- Thông thường file store trên disk nhưng nếu kích thước file nhỏ hơn 1 block thì nó có thể store trực tiếp trong inode. - Điều này giúp tiết kiệm 1 lần access vào disk vì chỉ cần inode được load vào main mem. Nếu k sẽ phải load cả inode và block trên disk chứa file vào main mem.
+- 2 process dùng page table riêng nhưng share chung frame nếu cần access chung và read only
+- One big inconvenient of keeping record of free blocks using a linked list of disk blocks is that if one link is destroyed then the whole record of the free blocks is lost
+- Dùng two-level page table và no TLB. Cần access vào main memory 3 lần for each data/instruction read or written: 1 lần cho page, 2 lần cho data
+- VAS xđ bằng n bit thì size of process k thể lớn hơn 2^n
+- Processes đang chạy trong a critical section có thể bị de-scheduled -> bởi vì de-scheduled có nhiều lý do, vc chạy trong critical section chỉ đảm bảo chỉ có 1 thread chạy nó vào 1 ktg chứ đang chạy gặp lỗi vẫn descheduled bth
+- swap space là đang nói tới là trên partition of HDD or SSD
+- Các threads trong là 1 phần của cùng 1 process có thể access dùng 1 TLB entry
+- Khi chuyển từ bit sang byte, ta sẽ phải round to byte
+- Địa chỉ của frame hay page trong page table là base + index*(size of an entry) => chứ nó k cộng dồn vào địa chỉ address bên trong đâu. Cái page và frame nó đều nằm trên mem và có địa chỉ riêng liên tiếp nhau. 
+VD: The Page-Table Base Register (PTBR) points to the base address of the process’s page table in the kernel. Assume main memory is 2^32, logical addresses are on 32 bits, page size is 2^12, the program execution makes a reference to logical address 8293. Let x be the base address of the page table, what is the address in the kernel of the entry of the page table referenced by logical address 8293? => x + 8 nhưng ta lại ra là x + 6 vì đầu tiên page 0 có địa chỉ là x. 8293 nằm trong page 2 thì giá trị là x + 2*(size of entry). Mà 1 entry cần đánh hết frame thì trong TH mặc định, 1 page 1 address thì cần tới 20 bit để đánh index mọi frame hay kích thước của 1 entry là round to byte là 3 bytes nên ta mới ra là x + 6. Còn tại sao ô thầy ra x + 8 ta cũng chưa hiểu được
+- Page fault thông báo ra 1 interrupt nhưng k gọi là 1 error
+- The process of dividing a disk into sectors that the disk controller can read and write, before a disk can store data is low-level formatting
+- Số lượng head bằng số lượng track trong 1 cylinder
+- In pure demand paging, a process is started with no pages loaded into main memory. What is an upper bound on the amount of memory in total (main + swap space on disk) a process of 2^k bytes can use at any time (assuming 2k modulo page size = 0) => ez 2^(k+1) bytes vì main và swap space có kích thước là 2^k cộng lại 
+- page-reference string là đang nói tới chuỗi page number access.
+VD: Assume that you have a page-reference string for a process with k frames (initially all empty). The page-reference string has length n in which m distinct page numbers occur in it. Given any page-replacement algorithms, what is a lower bound on the number of page faults? => tự nhiên nhớ đúng cái bài synchronization phát dễ hẳn luôn. k là lượng frame thì chắc chắn kp, n là độ dài reference string thì k thể nào lấy page nào cũng là page fault được nên kp, m distince page thì đúng vì mỗi 1 page mới xuất hiện thì ít nhất là nó phải page fault 1 lần tức là min phải là m
+
