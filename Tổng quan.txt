@@ -4,20 +4,21 @@ Câu trúc bộ nhớ: 4 phần
 logical và physical address space: bản chất là ánh xạ bằng MMU
 Address space protection: base + limit
 Variable partition: dùng hole là contiguous mem management
-Fragment probs: k tận dụng được hết
+Fragment probs: k tận dụng được hết -> compaction
 -> page: chia logical thành page, chia physical thành frame, ánh xạ 2 cái qua page table
 TLB: như buffer vào thẳng main mem
 Effective access time: EAT = 90%x+10%2x
 Invalid, valid bit
 Page table lớn sẽ tốn và lâu -> 3 structure:
 1) Hirarchical Page Table được implement bằng technique 2 level page table: [p1,p2,d]
+=> Chốt: hiểu như trong slide, inner page có hàng loạt page đầy đủ như bth và gom lại đánh địa chỉ đầu tiên để outer page trỏ tới, mỗi entry vẫn là đầy đủ page
 2) Hash page table: hash m-n bit đầu address -> entry in hash table => chú ý nó thay page table hoàn toàn bằng hash table. 
 3) Inverted Page Table: giảm mem nhưng tăng time. Thay vì: logical address -> page table -> physical mem => ta dùng: entry in page table -> physical mem. Mọi process chung
 Swap: process đi ra backing store rồi đi vào main mem => swap the whole process. Context switch đi kèm swapping: next process khi switch phải swap out current process và swap in target process
+=> Cơ chế => sắp xếp bộ nhớ process vào physical mem -> liên tiếp k tối ưu nên dùng rời rạc -> page rời rạc lại có lỗi nên dùng 2 level
 
 Segmentation: mỗi segment là 1 contiguous mem qua segment table => check với limit rồi + base
 
-=> Cơ chế => sắp xếp bộ nhớ process vào physical mem -> liên tiếp k tối ưu nên dùng rời rạc -> page rời rạc lại có lỗi nên dùng 2 level
 
 
 
@@ -74,7 +75,7 @@ Secondary storage devices: nơi lưu file các thứ
       Performance: seek time, rational latency, transfer time
     SSD: non volatile - NVM
       Cấu tạo: tĩnh và no seektime or rotational latency, k thể overwrite mà phải erase ghi mới, số lần erase ảnh hưởng tuổi thọ, NAND semiconductor lưu mix pages valid và invalid data
-  Disk formating: đĩa trống -> chia thành sector -> disk partition thành từng nhóm cylinder lưu file -> tạo file system 
+  Disk formating: đĩa trống -> chia thành sector là lowlevel formatting -> disk partition thành từng nhóm cylinder lưu file -> tạo file system 
 Files: process tạo file sẽ gán name cho nó và lưu được nó trên disk
   File naming: rule tùy hệ điều hành, file extension giới hạn 255 ký tự và là thứ quyết định ứng dụng mở file
   File attributes: file metadata cung thông tin đi kèm

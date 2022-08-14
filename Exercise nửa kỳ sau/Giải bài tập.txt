@@ -38,6 +38,7 @@ I/O operation xảy ra thì mới đổi trạng thái của thread, VD khi đ�
 
 B5: demand paging là đang nói page fault. associative mem là TLB
 Thỉnh thoảng chưa chắc tg TLB miss đã là 2x, đề bài k nói mới v, có thể đề bài tự cho
+Cái đặc biệt nx là page fault xong nó cộng thêm cả time access lại lần nx và coi bị TLB miss luôn vì khi lấy về nó có thao tác lại mà
 
 B8: ta đang hiểu là TH single page thì page table là của 1 page riêng, mỗi page có 1 page table
 

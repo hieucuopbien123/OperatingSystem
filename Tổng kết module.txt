@@ -319,6 +319,19 @@ Thrashing thì có quá nhiều process làm nó page fault liên tục, thời 
 
 Trong các hệ điều hành, nó luôn giới hạn size của các process max. VD window 32bit mà process vượt quá 2GB có thể bị system reject. logical address max từ 0 đến 2^22-1
 
+[frame1][frame2][frame3][frame4][frame5]
+delta = 5
+-> WSSi của process i -> WSS1 = 3 = D -> m > 3 là cản thrashing cho process 1
+
+interval time, reference bits
+[frame1 - 111][frame2 - 111][frame3 - 011][frame4 - 011][frame5 - 011]
+interval time = 3ms
+sau 6ms: 
+[frame1 - 101][frame2 - 111][frame3 - 011][frame4 - 001][frame5 - 001]
+sau 9ms:
+[frame1 - 011][frame2 - 011][frame3 - 011][frame4 - 000][frame5 - 000]
+=> D = 3 => m > 3 => Working set strategy
+
 
 
 # Synchonization:
@@ -545,7 +558,7 @@ Có 1 small memory trên mainboard của máy tính gọi là BIOS, nó chứa c
 - Các threads trong là 1 phần của cùng 1 process có thể access dùng 1 TLB entry
 - Khi chuyển từ bit sang byte, ta sẽ phải round to byte
 - Địa chỉ của frame hay page trong page table là base + index*(size of an entry) => chứ nó k cộng dồn vào địa chỉ address bên trong đâu. Cái page và frame nó đều nằm trên mem và có địa chỉ riêng liên tiếp nhau. 
-VD: The Page-Table Base Register (PTBR) points to the base address of the process’s page table in the kernel. Assume main memory is 2^32, logical addresses are on 32 bits, page size is 2^12, the program execution makes a reference to logical address 8293. Let x be the base address of the page table, what is the address in the kernel of the entry of the page table referenced by logical address 8293? => x + 8 nhưng ta lại ra là x + 6 vì đầu tiên page 0 có địa chỉ là x. 8293 nằm trong page 2 thì giá trị là x + 2*(size of entry). Mà 1 entry cần đánh hết frame thì trong TH mặc định, 1 page 1 address thì cần tới 20 bit để đánh index mọi frame hay kích thước của 1 entry là round to byte là 3 bytes nên ta mới ra là x + 6. Còn tại sao ô thầy ra x + 8 ta cũng chưa hiểu được
+VD: The Page-Table Base Register (PTBR) points to the base address of the process’s page table in the kernel. Assume main memory is 2^32, logical addresses are on 32 bits, page size is 2^12, the program execution makes a reference to logical address 8293. Let x be the base address of the page table, what is the address in the kernel of the entry of the page table referenced by logical address 8293? => x + 8 nhưng ta lại ra là x + 6 vì đầu tiên page 0 có địa chỉ là x. 8293 nằm trong page 2 thì giá trị là x + 2*(size of entry). Mà 1 entry cần đánh hết frame thì trong TH mặc định, 1 page 1 address thì cần tới 20 bit để đánh index mọi frame hay kích thước của 1 entry là round to byte là 3 bytes nên ta mới ra là x + 6. Còn tại sao ô thầy ra x + 8 ta cũng chưa hiểu được. Nếu entry nó lưu cả địa chỉ frame là 32 bit = 4 byte thì x+8 ok ngay, chả biết ô già muốn lưu như nào nx
 - Page fault thông báo ra 1 interrupt nhưng k gọi là 1 error
 - The process of dividing a disk into sectors that the disk controller can read and write, before a disk can store data is low-level formatting
 - Số lượng head bằng số lượng track trong 1 cylinder
